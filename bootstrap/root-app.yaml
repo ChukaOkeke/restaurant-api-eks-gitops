@@ -1,0 +1,26 @@
+# The root/master/orchestrator application you will manually apply to the cluster once Argo CD is installed. It monitors the argocd-apps directory and automatically deploys everything inside it
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io  # Ensures that Argo CD cleans up resources when the Application is deleted
+spec:
+  project: default
+  source:
+    # Replace with your actual GitHub username/repo
+    repoURL: 'https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git'
+    targetRevision: HEAD
+    # Points to the directory containing all other Argo CD Application manifests
+    path: argocd-apps
+  destination:
+    server: 'https://kubernetes.default.svc'  # Points to the in-cluster Kubernetes API server
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
