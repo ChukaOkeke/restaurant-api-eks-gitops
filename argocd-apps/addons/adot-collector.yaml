@@ -1,0 +1,33 @@
+# This ArgoCD Application deploys the ADOT Collector via Helm to the EKS cluster.
+# The ADOT Collector is responsible for collecting telemetry data (metrics, traces, and logs) from the application and sending it to observability backends.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: adot-collector
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: opentelemetry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  sources:
+    # Source 1: Official OpenTelemetry Helm Chart
+    - repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+      chart: opentelemetry-collector
+      targetRevision: 0.90.1
+      helm:
+        valueFiles:
+          - $values/values/addons/adot-collector-values.yaml
+    # Source 2: GitOps Configuration Repo for the values file
+    - repoURL: https://github.com/chuka-okeke/restaurant-api-eks-gitops.git
+      targetRevision: HEAD
+      ref: values

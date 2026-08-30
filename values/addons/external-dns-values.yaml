@@ -1,0 +1,28 @@
+provider: aws
+
+aws:
+  zoneType: public # Enforces updates only to public Route53 hosted zones
+
+# Explicitly watch Ingress resources for DNS host declarations
+sources:
+  - ingress
+
+# Tells ExternalDNS to only manage records matching this domain/hosted zone
+domainFilters:
+  - "asgardcuisines.link"
+
+# Unique identifier for TXT record ownership verification (using cluster name is standard industry best practice)
+txtOwnerId: "restaurant-api-eks"
+
+# Defines how ExternalDNS manages records. 'sync' creates, updates, and deletes records matching txtOwnerId
+policy: sync
+
+env:
+  - name: AWS_REGION
+    value: "eu-west-1"
+
+# EKS Pod Identity setup negates the need for OIDC/IRSA annotations here
+serviceAccount:
+  create: true
+  # Must match the ServiceAccount mapped to the Route53 IAM Role via EKS Pod Identity
+  name: "external-dns-sa"

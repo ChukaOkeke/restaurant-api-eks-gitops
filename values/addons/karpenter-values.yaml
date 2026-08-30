@@ -1,0 +1,24 @@
+# Cluster connection settings
+settings:
+  clusterName: "restaurant-api-eks"
+  # SQS queue for EC2 Spot interruption and rebalance notifications
+  interruptionQueue: "restaurant-api-eks-karpenter-queue"
+
+serviceAccount:
+  create: true
+  # ServiceAccount mapped to Karpenter Controller IAM Role via EKS Pod Identity
+  name: "karpenter-sa"
+
+controller:
+  replicas: 2
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+# Prevents Karpenter pods from scheduling onto Karpenter-managed node pools, only on the static EKS managed node group
+nodeSelector:
+  karpenter.sh/discovery: "restaurant-api-eks"
