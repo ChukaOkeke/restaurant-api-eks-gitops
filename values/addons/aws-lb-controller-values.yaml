@@ -1,0 +1,10 @@
+# Replaces your cluster name dynamically via Terraform or manual entry
+clusterName: "restaurant-api-eks"
+
+serviceAccount:
+  create: true
+  # Must match the Service Account name associated with the EKS Pod Identity Agent via Terraform
+  name: "aws-load-balancer-controller-sa"
+
+# Ensure the controller deploys with high availability (Leader Election enabled by default)
+replicaCount: 2

@@ -1,0 +1,31 @@
+# This ArgoCD Application deploys the Restaurant API to the EKS cluster.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: restaurant-api
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    # Source 1: The Application Helm Chart (Templates + Default Values)
+    - repoURL: 'https://github.com/ChukaOkeke/restaurant-api-eks.git'
+      path: 'charts/restaurant-api'
+      targetRevision: HEAD
+      helm:
+        # The $values variable refers to the 'ref: values' source below
+        valueFiles:
+          - $values/values/production/restaurant-api-values.yaml
+    # Source 2: The GitOps Configuration (Production Values)
+    - repoURL: 'https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git'
+      targetRevision: HEAD
+      ref: values # This points to the 'values' directory in the GitOps repo, which contains the values file for the Helm chart
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: restaurant-api
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

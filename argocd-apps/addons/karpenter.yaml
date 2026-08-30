@@ -1,0 +1,31 @@
+# This ArgoCD Application deploys the Karpenter controller via Helm to the EKS cluster.
+# The Karpenter controller is responsible for automatically provisioning and terminating EC2 instances based on pod scheduling demands.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: karpenter
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  sources:
+    # Source 1: Official Karpenter Helm Chart
+    - repoURL: public.ecr.aws/karpenter
+      chart: karpenter
+      targetRevision: 1.0.0
+      helm:
+        valueFiles:
+          - $values/values/addons/karpenter-values.yaml
+    # Source 2: GitOps Configuration Repo for the values file
+    - repoURL: https://github.com/chuka-okeke/restaurant-api-eks-gitops.git
+      targetRevision: HEAD
+      ref: values

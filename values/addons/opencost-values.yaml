@@ -1,0 +1,57 @@
+opencost:
+  exporter:
+    # Queries the Prometheus Operator service managed by kube-prometheus-stack
+    prometheus:
+      external:
+        enabled: true
+        url: "http://prometheus-operated.monitoring.svc.cluster.local:9090"
+    defaultClusterId: "restaurant-api-eks"
+    
+  ui:
+    enabled: true
+
+service:
+  type: ClusterIP
+  port: 9003
+
+
+# opencost:
+#   exporter:
+#     defaultClusterId: "restaurant-api-eks"
+#     prometheus:
+#       external:
+#         enabled: true
+#         # Local SigV4 proxy sidecar endpoint running on localhost
+#         url: "http://127.0.0.1:8005/workspaces/ws-12345678-abcd-ef01-2345-6789abcdef01"
+      
+#   ui:
+#     enabled: true
+
+# # Enable ServiceAccount explicitly so EKS Pod Identity can map the AMP IAM Role
+# serviceAccount:
+#   create: true
+#   name: "opencost-sa"
+
+# # Inject the SigV4 Proxy Sidecar to handle AWS IAM signing to AMP
+# extraContainers:
+#   - name: aws-sigv4-proxy
+#     image: public.ecr.aws/aws-observability/aws-sigv4-proxy:v1.0
+#     args:
+#       - --name=aps
+#       - --region=eu-west-1
+#       - --host=aps-workspaces.eu-west-1.amazonaws.com
+#       - --port=:8005
+#     ports:
+#       - containerPort: 8005
+#         name: aws-sigv4-proxy
+#     resources:
+#       limits:
+#         cpu: 100m
+#         memory: 128Mi
+#       requests:
+#         cpu: 50m
+#         memory: 64Mi
+
+# service:
+#   type: ClusterIP
+#   port: 9003

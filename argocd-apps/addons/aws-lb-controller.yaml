@@ -1,0 +1,29 @@
+# This ArgoCD Application deploys the AWS Load Balancer Controller via Helm to the EKS cluster.
+# The AWS Load Balancer Controller is responsible for creating and managing AWS Load Balancers for Kubernetes services.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    # Source 1: Official AWS EKS Helm Chart
+    - repoURL: 'https://aws.github.io/eks-charts'
+      chart: aws-load-balancer-controller
+      targetRevision: 1.8.1 # Lock to a stable version
+      helm:
+        valueFiles:
+          - $values/values/addons/aws-lb-controller-values.yaml # Source 2: Path to the values file in the GitOps Configuration Repo
+    # Source 2: GitOps Configuration Repo for the values file
+    - repoURL: 'https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git'
+      targetRevision: HEAD
+      ref: values # This points to the 'values' directory in the GitOps repo, which contains the values file for the Helm chart
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

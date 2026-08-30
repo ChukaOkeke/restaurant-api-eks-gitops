@@ -1,0 +1,28 @@
+# ExternalDNS automatically reads the host: "api.asgardcuisines.link" declaration from the application ingress and creates the necessary Route53 Alias records pointing to the ALB
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    # Source 1: Official Bitnami Helm Chart
+    - repoURL: 'https://charts.bitnami.com/bitnami'
+      chart: external-dns
+      targetRevision: 8.3.4
+      helm:
+        valueFiles:
+          - $values/values/addons/external-dns-values.yaml
+    # Source 2: GitOps repo
+    - repoURL: 'https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git'
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

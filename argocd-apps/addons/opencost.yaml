@@ -1,0 +1,33 @@
+# This ArgoCD Application deploys OpenCost via Helm to the EKS cluster.
+# OpenCost is a cost monitoring and optimization tool for Kubernetes clusters, providing insights into resource usage and associated costs.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opencost
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: opencost
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  sources:
+    # Source 1: Official OpenCost Helm Chart
+    - repoURL: https://opencost.github.io/opencost-helm-chart
+      chart: opencost
+      targetRevision: 1.15.0
+      helm:
+        valueFiles:
+          - $values/values/addons/opencost-values.yaml
+    # Source 2: GitOps Configuration Repo for the values file
+    - repoURL: https://github.com/chuka-okeke/restaurant-api-eks-gitops.git
+      targetRevision: HEAD
+      ref: values
