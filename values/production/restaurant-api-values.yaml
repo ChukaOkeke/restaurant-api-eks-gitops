@@ -1,25 +1,21 @@
 # Overrides default replicaCount for production HA
 replicaCount: 3
-
 image:
   # Tag updated dynamically by GitHub Actions CI pipeline in the GitOps repo
-  tag: "v1.0.0" 
-
+  tag: "v1.0.0"
 env:
   awsRegion: "eu-west-1"
   # Production settings file containing logging and cache configurations
   djangoSettingsModule: "config.settings"
-
 ingress:
   enabled: true
   className: "alb"
   # Matches the Route53-registered domain name for the ALB to route traffic to the API service
   host: "api.asgardcuisines.link"
   # The security group allowing traffic only from CloudFront managed prefix list
-  albSecurityGroup: "sg-0987654321fedcba0" # Replace with Terraform output
+  albSecurityGroup: "sg-095fc375fa074601f" # Replace with Terraform output
   # ACM certificate for TLS termination at the ALB
-  certificateArn: "arn:aws:acm:eu-west-1:123456789012:certificate/uuid" # Replace with Terraform output
-
+  certificateArn: "arn:aws:acm:eu-west-1:618339653656:certificate/72e967ae-5cdc-4660-bd57-79da6412f01a" # Replace with Terraform output
 # Resource limits strictly enforced for cost visibility (OpenCost) and K8s stability
 resources:
   requests:
@@ -28,7 +24,6 @@ resources:
   limits:
     cpu: 500m
     memory: 1Gi
-
 autoscaling:
   enabled: true
   minReplicas: 3
