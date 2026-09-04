@@ -2,7 +2,7 @@
 replicaCount: 3
 image:
   # Tag updated dynamically by GitHub Actions CI pipeline in the GitOps repo
-  tag: "c61d1a6"
+  tag: "890e284"
 env:
   awsRegion: "eu-west-1"
   # Production settings file containing logging and cache configurations
