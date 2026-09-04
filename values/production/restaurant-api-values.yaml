@@ -10,12 +10,10 @@ env:
   useS3: "True"
   s3BucketName: "restaurant-api-dev-static-assets-618339653656"
   cloudfrontDomain: "asgardcuisines.link"
-
 secrets:
   storeName: "aws-secretsmanager"
   appSecretName: "restaurant-api-dev-app-secrets"
-  rdsSecretName: "rds!db-5d71f9db-a0b2-4aa5-b002-7e07553bb8eb" # Replace with Terraform output
-
+  rdsSecretName: "arn:aws:secretsmanager:eu-west-1:618339653656:secret:rds!db-5d71f9db-a0b2-4aa5-b002-7e07553bb8eb-gIcBFY" # Replace with Terraform output
 ingress:
   enabled: true
   className: "alb"
