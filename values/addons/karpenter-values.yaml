@@ -2,7 +2,7 @@
 settings:
   clusterName: "restaurant-api-eks"
   # SQS queue for EC2 Spot interruption and rebalance notifications
-  interruptionQueue: "restaurant-api-eks-karpenter-queue"
+  interruptionQueue: ""
 
 serviceAccount:
   create: true
