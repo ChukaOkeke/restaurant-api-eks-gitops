@@ -1,5 +1,9 @@
 mode: deployment
 
+image:
+  repository: "public.ecr.aws/aws-observability/aws-otel-collector"
+  tag: "v0.40.0"
+
 serviceAccount:
   create: true
   # ServiceAccount mapped to AWS CloudWatch & X-Ray IAM Role via EKS Pod Identity
