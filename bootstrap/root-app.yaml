@@ -15,6 +15,8 @@ spec:
     targetRevision: HEAD
     # Points to the directory containing all other Argo CD Application manifests
     path: argocd-apps
+    directory:
+      recurse: true  # Enables ArgoCD to scan addons/ and apps/ subdirectories
   destination:
     server: 'https://kubernetes.default.svc'  # Points to the in-cluster Kubernetes API server
     namespace: argocd

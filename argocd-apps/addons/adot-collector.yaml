@@ -6,6 +6,8 @@ kind: Application
 metadata:
   name: adot-collector
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -28,6 +30,6 @@ spec:
         valueFiles:
           - $values/values/addons/adot-collector-values.yaml
     # Source 2: GitOps Configuration Repo for the values file
-    - repoURL: https://github.com/chuka-okeke/restaurant-api-eks-gitops.git
+    - repoURL: https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git
       targetRevision: HEAD
       ref: values
