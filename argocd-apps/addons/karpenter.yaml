@@ -25,6 +25,7 @@ spec:
       chart: karpenter
       targetRevision: 1.0.0
       helm:
+        skipHooks: true # Skip Helm hooks to avoid Public ECR rate limits during post-install/pre-delete operations
         valueFiles:
           - $values/values/addons/karpenter-values.yaml
     # Source 2: GitOps Configuration Repo for the values file
