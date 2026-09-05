@@ -17,7 +17,7 @@ secrets:
   appSecretName: "restaurant-api-dev-app-secrets"
   rdsSecretName: "arn:aws:secretsmanager:eu-west-1:618339653656:secret:rds!db-b2b37003-154d-4bab-aec8-5841ec3b01f6-a1CIZ2" # Replace with Terraform output
 config:
-  DB_HOST: "restaurant-api-dev-db.cvcmaqucsk7w.eu-west-1.rds.amazonaws.com:5432" # Replace with Terraform output
+  DB_HOST: "restaurant-api-dev-db.cvcmaqucsk7w.eu-west-1.rds.amazonaws.com" # Replace with Terraform output
   DB_NAME: "asgard_cuisines_db"
   DB_PORT: 5432
 ingress:
