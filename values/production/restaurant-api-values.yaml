@@ -11,6 +11,7 @@ env:
   useS3: "True"
   s3BucketName: "restaurant-api-dev-static-assets-618339653656"
   cloudfrontDomain: "asgardcuisines.link"
+  sqsQueueUrl: "https://sqs.eu-west-1.amazonaws.com/618339653656/restaurant-api-dev-queue" # Replace with Terraform output
 secrets:
   storeName: "aws-secretsmanager"
   appSecretName: "restaurant-api-dev-app-secrets"
