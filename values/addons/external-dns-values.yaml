@@ -1,3 +1,8 @@
+# Override default image to official Kubernetes upstream registry
+image:
+  repository: registry.k8s.io/external-dns/external-dns
+  tag: v0.14.2
+
 provider: aws
 
 aws:
