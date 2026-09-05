@@ -3,7 +3,7 @@ replicaCount: 3
 image:
   # Repo & Tag updated dynamically by GitHub Actions CI pipeline in the GitOps repo
   repository: "/restaurant-api-dev-app"
-  tag: "7adbe54"
+  tag: "5dd6fa7"
 env:
   awsRegion: "eu-west-1"
   # Production settings file containing logging and cache configurations
