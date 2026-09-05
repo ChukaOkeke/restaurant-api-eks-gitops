@@ -6,11 +6,25 @@ image:
 
 serviceAccount:
   create: true
-  # ServiceAccount mapped to AWS CloudWatch & X-Ray IAM Role via EKS Pod Identity
   name: "adot-collector-sa"
+
+# Explicitly disable chart default presets
+presets:
+  logsCollection:
+    enabled: false
+  hostMetrics:
+    enabled: false
+  kubernetesAttributes:
+    enabled: false
+  kubeletMetrics:
+    enabled: false
 
 config:
   receivers:
+    # Explicitly set uncompiled default receivers to null
+    jaeger: null
+    zipkin: null
+    prometheus: null
     otlp:
       protocols:
         grpc:
@@ -28,14 +42,25 @@ config:
       spike_limit_percentage: 15
 
   exporters:
+    # Nullify uncompiled debug exporter
+    debug: null
     awsxray:
       region: "eu-west-1"
     awsemf:
       region: "eu-west-1"
       log_group_name: "/aws/eks/asgardcuisines/opentelemetry"
+      log_stream_name: "adot-metrics"
+
+  extensions:
+    health_check:
+      endpoint: 0.0.0.0:13133
 
   service:
+    extensions:
+      - health_check
     pipelines:
+      # Nullify unused logs pipeline referencing debug exporter
+      logs: null
       traces:
         receivers: [otlp]
         processors: [memory_limiter, batch]
