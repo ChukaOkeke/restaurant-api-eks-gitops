@@ -18,6 +18,7 @@ secrets:
 config:
   DB_HOST: "restaurant-api-dev-db.cvcmaqucsk7w.eu-west-1.rds.amazonaws.com:5432" # Replace with Terraform output
   DB_NAME: "asgard_cuisines_db"
+  DB_PORT: 5432
 ingress:
   enabled: true
   className: "alb"
