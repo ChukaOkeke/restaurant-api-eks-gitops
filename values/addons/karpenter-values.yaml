@@ -4,11 +4,8 @@ settings:
   # SQS queue for EC2 Spot interruption and rebalance notifications
   interruptionQueue: ""
 
-# Override post-install/pre-delete hook image to bypass Public ECR rate limits and pull from Docker Hub or registry.k8s.io
-additionalImagePullSecrets: []
-
-# If your chart version supports hook image overrides:
-webhook:
+# Disable Helm post-install/pre-delete hooks to bypass Public ECR rate limits
+hooks:
   enabled: false
 
 serviceAccount:
