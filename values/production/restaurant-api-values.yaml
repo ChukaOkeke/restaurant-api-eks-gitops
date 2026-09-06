@@ -15,7 +15,7 @@ env:
 secrets:
   storeName: "aws-secretsmanager"
   appSecretName: "restaurant-api-dev-app-secrets"
-  rdsSecretName: "arn:aws:secretsmanager:eu-west-1:618339653656:secret:rds!db-91039268-6c79-47f2-8426-76f904e0bab3-2D3T9L" # Replace with Terraform output
+  rdsSecretName: "arn:aws:secretsmanager:eu-west-1:618339653656:secret:rds!db-cd273c5c-1d0b-45a7-aadc-dbe3a67b9968-OI4Wuh" # Replace with Terraform output
 config:
   DB_HOST: "restaurant-api-dev-db.cvcmaqucsk7w.eu-west-1.rds.amazonaws.com" # Replace with Terraform output
   DB_NAME: "asgard_cuisines_db"
@@ -26,9 +26,9 @@ ingress:
   # Matches the Route53-registered domain name for the ALB to route traffic to the API service
   host: "api.asgardcuisines.link"
   # The security group allowing traffic only from CloudFront managed prefix list
-  albSecurityGroup: "sg-06b38c0faf4643c6c" # Replace with Terraform output
+  albSecurityGroup: "sg-0a4dfe0c920bef88e" # Replace with Terraform output
   # ACM certificate for TLS termination at the ALB
-  certificateArn: "arn:aws:acm:eu-west-1:618339653656:certificate/2f1bfb18-9c37-430f-b083-95ad417d46e7" # Replace with Terraform output
+  certificateArn: "arn:aws:acm:eu-west-1:618339653656:certificate/15d7ba55-7947-47a3-8a27-edb77b19dbf8" # Replace with Terraform output
 # Resource limits strictly enforced for cost visibility (OpenCost) and K8s stability
 resources:
   requests:
