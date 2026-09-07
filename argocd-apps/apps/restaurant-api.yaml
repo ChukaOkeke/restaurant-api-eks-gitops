@@ -31,3 +31,14 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # Prevents Argo CD dry-run validation from failing when validating ExternalSecret CRs 
+      # before the Kubernetes API cache updates schema definitions from wave 1 CRD installations.
+      - SkipDryRunOnMissingResource=true 
+    # Automatically retries app deployment with exponential backoff if ESO takes a few 
+    # seconds to authenticate via AWS IAM/Pod Identity before rendering secret values. 
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
