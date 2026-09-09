@@ -26,7 +26,7 @@ spec:
     path: manifests/addons/karpenter
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: karpenter
+    namespace: kube-system
   syncPolicy:
     automated:
       # Automatically delete resources no longer present in Git
