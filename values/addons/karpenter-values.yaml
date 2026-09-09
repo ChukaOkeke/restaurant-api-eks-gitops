@@ -15,6 +15,9 @@ serviceAccount:
 
 controller:
   replicas: 2
+  env:
+    - name: AWS_REGION
+      value: "eu-west-1"
   resources:
     limits:
       cpu: 1000m
