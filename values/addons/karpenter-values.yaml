@@ -2,7 +2,7 @@
 settings:
   clusterName: "restaurant-api-eks"
   # SQS queue for EC2 Spot interruption and rebalance notifications
-  interruptionQueue: ""
+  interruptionQueue: "restaurant-api-dev-karpenter-interruption"
 
 # Disable Helm post-install/pre-delete hooks to bypass Public ECR rate limits
 hooks:
