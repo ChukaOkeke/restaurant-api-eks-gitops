@@ -1,0 +1,35 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default-ec2nodeclass
+spec:
+  amiFamily: AL2023
+  amiSelectorTerms:
+    - alias: al2023@latest
+  # IAM Role provisioned by Terraform for Karpenter nodes
+  role: "arn:aws:iam::618339653656:role/restaurant-api-dev-karpenter-node-role"
+  # Auto-discover subnets (your cluster tags)
+  # Enforce private subnets only to prevent public IP assignment
+  subnetSelectorTerms:
+    - tags:
+        kubernetes.io/cluster/restaurant-api-eks: owned
+        kubernetes.io/role/internal-elb: "1" # This tag exists only on private subnets, so Karpenter will launch nodes exclusively in private subnets. 
+  # Auto-discover security groups
+  securityGroupSelectorTerms:
+    - tags:
+        kubernetes.io/cluster/restaurant-api-eks: owned
+  # Required for Karpenter auto-discovery of resources
+  tags:
+    karpenter.sh/discovery: restaurant-api-eks
+    Environment: dev
+    ManagedBy: Karpenter
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 20Gi
+        volumeType: gp3
+        encrypted: true
+        deleteOnTermination: true
+  metadataOptions:
+    httpTokens: required
+    httpPutResponseHopLimit: 2

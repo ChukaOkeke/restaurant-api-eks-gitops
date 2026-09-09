@@ -1,0 +1,55 @@
+# ==============================================================================
+# ARGOCD APPLICATION: KARPENTER CUSTOM RESOURCES
+# Deploys cluster autoscaling infrastructure (EC2NodeClass and NodePools)
+# ==============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: karpenter-resources
+  namespace: argocd
+  annotations:
+    # --------------------------------------------------------------------------
+    # SYNC WAVE DEPENDENCY MANAGEMENT
+    # Wave 2 ensures this application applies ONLY after Wave 1 addons
+    # (such as the main Karpenter Helm controller chart) are successfully synced.
+    # --------------------------------------------------------------------------
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    # Ensures cascading deletion: deleting this ArgoCD app will cleanly remove
+    # managed NodePools and EC2NodeClass before removing the app metadata.
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git'
+    targetRevision: HEAD
+    path: manifests/addons/karpenter
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: karpenter
+  syncPolicy:
+    automated:
+      # Automatically delete resources no longer present in Git
+      prune: true
+      # Automatically resync if cluster resources drift from Git state
+      selfHeal: true
+    syncOptions:
+      # ------------------------------------------------------------------------
+      # CRD SCHEMA CACHE BYPASS
+      # Prevents dry-run validation errors if the local ArgoCD server cache has
+      # not yet refreshed the newly registered karpenter.sh and karpenter.k8s.aws
+      # CRD schemas installed by the Helm chart during Wave 1.
+      # ------------------------------------------------------------------------
+      - SkipDryRunOnMissingResource=true
+    retry:
+      # ------------------------------------------------------------------------
+      # AUTOMATIC BOOTSTRAP RETRY LOGIC
+      # Retries sync operations automatically if the underlying Karpenter 
+      # controller pod or its Admission Webhook services are still initializing 
+      # and accepting incoming resource validations when Wave 2 executes.
+      # ------------------------------------------------------------------------
+      limit: 5
+      backoff:
+        duration: 10s     # Initial retry backoff delay
+        factor: 2         # Exponential growth factor for sequential retries (10s, 20s, 40s...)
+        maxDuration: 3m   # Maximum backoff interval ceiling
