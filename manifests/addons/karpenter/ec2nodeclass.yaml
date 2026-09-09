@@ -7,7 +7,7 @@ spec:
   amiSelectorTerms:
     - alias: al2023@latest
   # IAM Role provisioned by Terraform for Karpenter nodes
-  role: "arn:aws:iam::618339653656:role/restaurant-api-dev-karpenter-node-role"
+  role: "restaurant-api-dev-karpenter-node-role"
   # Auto-discover subnets (your cluster tags)
   # Enforce private subnets only to prevent public IP assignment
   subnetSelectorTerms:
