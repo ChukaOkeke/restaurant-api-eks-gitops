@@ -32,7 +32,7 @@ ingress:
 # Resource limits strictly enforced for cost visibility (OpenCost) and K8s stability
 resources:
   requests:
-    cpu: 400m
+    cpu: 250m
     memory: 512Mi
   limits:
     cpu: 500m
