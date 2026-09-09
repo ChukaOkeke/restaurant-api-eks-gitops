@@ -12,12 +12,12 @@ spec:
   # Enforce private subnets only to prevent public IP assignment
   subnetSelectorTerms:
     - tags:
-        kubernetes.io/cluster/restaurant-api-eks: owned
+        karpenter.sh/discovery: restaurant-api-eks
         kubernetes.io/role/internal-elb: "1" # This tag exists only on private subnets, so Karpenter will launch nodes exclusively in private subnets. 
   # Auto-discover security groups
   securityGroupSelectorTerms:
     - tags:
-        kubernetes.io/cluster/restaurant-api-eks: owned
+        karpenter.sh/discovery: restaurant-api-eks
   # Required for Karpenter auto-discovery of resources
   tags:
     karpenter.sh/discovery: restaurant-api-eks
