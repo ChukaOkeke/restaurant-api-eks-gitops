@@ -33,6 +33,10 @@ config:
       service: "aps"
 
   receivers:
+    # Explicitly nullify uncompiled upstream receivers injected by chart defaults
+    jaeger: null
+    zipkin: null
+
     # OTLP Receiver for incoming application traces and metrics (gRPC/HTTP)
     otlp:
       protocols:
@@ -71,6 +75,10 @@ config:
       spike_limit_percentage: 15
 
   exporters:
+    # EXPLICITLY NULLIFY: ADOT collector image does not compile the upstream 'debug' exporter.
+    # Setting this to null prevents Helm from merging chart default 'debug: {}' into ConfigMap.
+    debug: null
+
     # AWS X-Ray Exporter for Application Traces
     awsxray:
       region: "eu-west-1"
@@ -86,6 +94,9 @@ config:
       - health_check
       - sigv4auth
     pipelines:
+      pipelines:
+      # EXPLICITLY NULLIFY: Chart default logs pipeline references the uncompiled 'debug' exporter
+      logs: null
       traces:
         receivers: [otlp]
         processors: [memory_limiter, batch]
