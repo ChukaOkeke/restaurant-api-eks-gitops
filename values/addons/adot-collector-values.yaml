@@ -94,8 +94,7 @@ config:
       - health_check
       - sigv4auth
     pipelines:
-      pipelines:
-      # EXPLICITLY NULLIFY: Chart default logs pipeline references the uncompiled 'debug' exporter
+      # Explicitly nullify chart default logs pipeline to drop reference to uncompiled 'debug' exporter
       logs: null
       traces:
         receivers: [otlp]
