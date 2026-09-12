@@ -1,3 +1,4 @@
+# Deployment mode for centralized metric scraping and trace collection
 mode: deployment
 
 image:
@@ -7,8 +8,11 @@ image:
 serviceAccount:
   create: true
   name: "adot-collector-sa"
+  annotations:
+    # ServiceAccount annotated for EKS Pod Identity / IRSA giving permissions to write to AMP and X-Ray
+    eks.amazonaws.com/role-arn: "arn:aws:iam::618339653656:role/restaurant-api-dev-adot-role"
 
-# Explicitly disable chart default presets
+# Disable default Helm chart presets to explicitly define custom pipelines
 presets:
   logsCollection:
     enabled: false
@@ -20,17 +24,42 @@ presets:
     enabled: false
 
 config:
+  # Enable SigV4 authentication extension for Amazon Managed Prometheus (AMP)
+  extensions:
+    health_check:
+      endpoint: 0.0.0.0:13133
+    sigv4auth:
+      region: "eu-west-1"
+      service: "aps"
+
   receivers:
-    # Explicitly set uncompiled default receivers to null
-    jaeger: null
-    zipkin: null
-    prometheus: null
+    # OTLP Receiver for incoming application traces and metrics (gRPC/HTTP)
     otlp:
       protocols:
         grpc:
           endpoint: 0.0.0.0:4317
         http:
           endpoint: 0.0.0.0:4318
+
+    # Prometheus scrape config targeting KSM and Node Exporter services
+    prometheus:
+      config:
+        scrape_configs:
+          - job_name: "kube-state-metrics"
+            scrape_interval: 30s
+            static_configs:
+              - targets: ["kube-state-metrics.monitoring.svc.cluster.local:8080"]
+
+          - job_name: "prometheus-node-exporter"
+            scrape_interval: 30s
+            kubernetes_sd_configs:
+              - role: endpoints
+                namespaces:
+                  names: ["monitoring"]
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_service_name]
+                action: keep
+                regex: prometheus-node-exporter
 
   processors:
     batch:
@@ -42,33 +71,29 @@ config:
       spike_limit_percentage: 15
 
   exporters:
-    # Nullify uncompiled debug exporter
-    debug: null
+    # AWS X-Ray Exporter for Application Traces
     awsxray:
       region: "eu-west-1"
-    awsemf:
-      region: "eu-west-1"
-      log_group_name: "/aws/eks/asgardcuisines/opentelemetry"
-      log_stream_name: "adot-metrics"
 
-  extensions:
-    health_check:
-      endpoint: 0.0.0.0:13133
+    # Prometheus Remote Write Exporter configured for AMP endpoint using SigV4 auth
+    prometheusremotewrite:
+      endpoint: "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-514f4699-446a-4c71-b38b-f4aa36a9a8f8/api/v1/remote_write"
+      auth:
+        authenticator: sigv4auth
 
   service:
     extensions:
       - health_check
+      - sigv4auth
     pipelines:
-      # Nullify unused logs pipeline referencing debug exporter
-      logs: null
       traces:
         receivers: [otlp]
         processors: [memory_limiter, batch]
         exporters: [awsxray]
       metrics:
-        receivers: [otlp]
+        receivers: [otlp, prometheus]
         processors: [memory_limiter, batch]
-        exporters: [awsemf]
+        exporters: [prometheusremotewrite]
 
 ports:
   otlp:

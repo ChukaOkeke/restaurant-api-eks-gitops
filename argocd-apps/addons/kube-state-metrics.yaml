@@ -1,0 +1,40 @@
+# ArgoCD Application deploying kube-state-metrics in Sync Wave 1.
+# Exposes cluster-level object states so the ADOT Collector can scrape and forward them to AMP.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-state-metrics
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # Retries sync if the monitoring namespace creation or cluster IP allocation 
+    # experiences transient API server latency.
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-state-metrics
+      targetRevision: 5.16.2
+      helm:
+        valueFiles:
+          - $values/values/addons/kube-state-metrics-values.yaml
+    - repoURL: https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git
+      targetRevision: HEAD
+      ref: values

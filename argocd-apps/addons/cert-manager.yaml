@@ -1,0 +1,43 @@
+# ArgoCD Application provisioning cert-manager in Sync Wave 1.
+# cert-manager must exist before the ADOT operator because ADOT relies on cert-manager to generate 
+# TLS certificates for its admission webhooks.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1" # Deployed in Wave 1 alongside infrastructure prerequisites
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # Retries sync automatically if initial CRD registration delays or pod 
+    # scheduling takes time while Karpenter provisions node capacity.
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+  sources:
+    # Official Jetstack cert-manager Helm chart
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targetRevision: v1.14.4
+      helm:
+        valueFiles:
+          - $values/values/addons/cert-manager-values.yaml
+    # Reference to GitOps repository for custom values
+    - repoURL: https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git
+      targetRevision: HEAD
+      ref: values

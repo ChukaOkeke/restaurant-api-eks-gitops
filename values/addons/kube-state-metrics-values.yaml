@@ -1,0 +1,13 @@
+# Expose standard HTTP endpoint for ADOT collector Prometheus scrape configuration
+prometheus:
+  monitor:
+    enabled: false # Standard Prometheus Operator CRDs not used; ADOT collector scrapes directly via service endpoints
+
+# Standard resource allocations for cluster metric generation
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
