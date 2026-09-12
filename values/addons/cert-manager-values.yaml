@@ -1,0 +1,8 @@
+# Installs Custom Resource Definitions (Certificates, Issuers) automatically with the chart release
+installCRDs: true
+
+# Enable Prometheus scraping annotations for cert-manager self-monitoring metrics
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: false

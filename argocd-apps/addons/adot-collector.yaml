@@ -21,6 +21,17 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # Bypasses dry-run validation failures if the Argo CD server cache hasn't refreshed 
+      # the CRD schemas or cert-manager admission webhooks installed during Wave 1.
+      - SkipDryRunOnMissingResource=true
+    # Retries sync automatically if AWS IAM Pod Identity associations or cert-manager 
+    # webhook endpoints are still initializing when Wave 2 triggers.
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
   sources:
     # Source 1: Official OpenTelemetry Helm Chart
     - repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts

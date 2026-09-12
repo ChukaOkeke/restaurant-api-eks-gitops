@@ -1,0 +1,39 @@
+# ArgoCD Application deploying prometheus-node-exporter as a DaemonSet in Sync Wave 1.
+# Emits hardware and OS-level metrics for EKS worker nodes.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-node-exporter
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    # Retries sync while DaemonSet pods spin up across newly provisioned worker nodes.
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: prometheus-node-exporter
+      targetRevision: 4.31.0
+      helm:
+        valueFiles:
+          - $values/values/addons/prometheus-node-exporter-values.yaml
+    - repoURL: https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git
+      targetRevision: HEAD
+      ref: values
