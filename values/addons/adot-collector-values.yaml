@@ -9,6 +9,29 @@ serviceAccount:
   annotations:
     # ServiceAccount annotated for EKS Pod Identity / IRSA giving permissions to write to AMP and X-Ray
     eks.amazonaws.com/role-arn: "arn:aws:iam::618339653656:role/restaurant-api-dev-adot-role"
+clusterRole:
+  create: true
+  name: "adot-collector-prometheus-role"
+  rules:
+    - apiGroups: [""]
+      resources:
+        - nodes
+        - nodes/metrics
+        - services
+        - endpoints
+        - pods
+        - namespaces
+        - configmaps
+      verbs: ["get", "list", "watch"]
+    - apiGroups: ["apps"]
+      resources:
+        - daemonsets
+        - deployments
+        - statefulsets
+        - replicasets
+      verbs: ["get", "list", "watch"]
+    - nonResourceURLs: ["/metrics"]
+      verbs: ["get"]
 # Disable default Helm chart presets to explicitly define custom pipelines
 presets:
   logsCollection:
