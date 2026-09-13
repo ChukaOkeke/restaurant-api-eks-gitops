@@ -96,7 +96,7 @@ config:
       region: "eu-west-1"
     # Prometheus Remote Write Exporter configured for AMP endpoint using SigV4 auth
     prometheusremotewrite:
-      endpoint: "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-514f4699-446a-4c71-b38b-f4aa36a9a8f8/api/v1/remote_write"
+      endpoint: "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-6bf8ff31-7859-4451-a303-a7aa97d419cb/api/v1/remote_write"
       auth:
         authenticator: sigv4auth
   service:
