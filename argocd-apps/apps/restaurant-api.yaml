@@ -6,7 +6,8 @@ metadata:
   name: restaurant-api
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    # Ensures all platform controllers are healthy before deploying the application.
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   project: default
   sources:

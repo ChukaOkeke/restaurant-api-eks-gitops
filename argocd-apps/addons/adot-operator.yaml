@@ -1,0 +1,46 @@
+# This ArgoCD Application deploys the ADOT Collector Operator via Helm to the EKS cluster.
+# The ADOT Collector Operator is responsible for managing the ADOT Collector deployment and configuration.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: adot-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: opentelemetry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # Bypasses dry-run validation failures if the Argo CD server cache hasn't refreshed 
+      # the CRD schemas or cert-manager admission webhooks installed during Wave 1.
+      - SkipDryRunOnMissingResource=true
+    # Retries sync automatically if AWS IAM Pod Identity associations or cert-manager 
+    # webhook endpoints are still initializing when Wave 2 triggers.
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+  sources:
+    # Source 1: Official OpenTelemetry Helm Chart
+    - repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+      chart: opentelemetry-operator
+      targetRevision: 0.70.0
+      helm:
+        valueFiles:
+          - $values/values/addons/adot-operator-values.yaml
+    # Source 2: GitOps Configuration Repo for the values file
+    - repoURL: https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git
+      targetRevision: HEAD
+      ref: values

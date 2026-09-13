@@ -1,0 +1,93 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: adot-traces
+  namespace: opentelemetry
+spec:
+  # Deployment mode runs as a centralized service for receiving app traces via OTLP gRPC/HTTP
+  mode: deployment
+  replicas: 2
+  # ServiceAccount with EKS Pod Identity attached to AWS X-Ray IAM policy
+  serviceAccount: adot-collector-sa
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  config:
+    receivers:
+      # Ingest traces from auto-instrumented applications
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      # Guard against Out-Of-Memory crashes during trace spikes
+      memory_limiter:
+        check_interval: 2s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+
+      # Filter out noisy ELB and Kubernetes liveness/readiness health check spans to lower X-Ray cost
+      filter/healthcheck:
+        error_mode: ignore
+        traces:
+          span:
+            - 'attributes["http.target"] == "/health"'
+            - 'attributes["url.path"] == "/health"'
+            - 'IsMatch(attributes["http.user_agent"], "^kube-probe/.*")'
+            - 'IsMatch(attributes["user_agent.original"], "^kube-probe/.*")'
+            - 'attributes["http.user_agent"] == "ELB-HealthChecker/2.0"'
+
+      # Attach Kubernetes pod/namespace/node metadata to trace attributes for context
+      k8sattributes:
+        auth_type: serviceAccount
+        passthrough: false
+        extract:
+          metadata:
+            - k8s.namespace.name
+            - k8s.deployment.name
+            - k8s.pod.name
+            - k8s.pod.uid
+            - k8s.node.name
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.ip
+          - sources:
+              - from: connection
+
+      # Batch spans into requests before exporting to AWS X-Ray
+      batch:
+        timeout: 5s
+        send_batch_size: 256
+
+    exporters:
+      # AWS X-Ray exporter configured for eu-west-1 region
+      awsxray:
+        region: eu-west-1
+        indexed_attributes:
+          - k8s.namespace.name
+          - k8s.pod.name
+          - k8s.deployment.name
+          - http.method
+          - http.status_code
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, filter/healthcheck, k8sattributes, batch]
+          exporters: [awsxray]

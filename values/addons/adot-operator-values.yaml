@@ -1,0 +1,45 @@
+# ==============================================================================
+# OPENTELEMETRY / ADOT OPERATOR HELM VALUES
+# Target Chart: opentelemetry-operator (https://open-telemetry.github.io/opentelemetry-helm-charts)
+# ==============================================================================
+# This configuration provisions only the Operator controller and its CRDs.
+# Telemetry pipelines (Metrics, Logs, Traces) are decoupled and managed via
+# standalone OpenTelemetryCollector Custom Resources under manifests/addons/adot/.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Manager / Controller Configuration
+# ------------------------------------------------------------------------------
+manager:
+  # Set AWS Distro for OpenTelemetry (ADOT) as default collector image for CRs
+  collectorImage:
+    repository: "public.ecr.aws/aws-observability/aws-otel-collector"
+    tag: "v0.40.0"
+
+  # ServiceAccount used exclusively by the Operator controller daemon
+  serviceAccount:
+    create: true
+    name: "adot-operator-controller-sa"
+
+  # Resource allocations for the operator controller pod
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# ------------------------------------------------------------------------------
+# 2. Admission Webhooks Configuration
+# ------------------------------------------------------------------------------
+# Uses cert-manager (installed in Wave 1) to issue TLS certificates for CRD validation
+admissionWebhooks:
+  certManager:
+    enabled: true
+
+# ------------------------------------------------------------------------------
+# 3. Scope & Feature Gates
+# ------------------------------------------------------------------------------
+# Allow the operator to watch and inject auto-instrumentation across all namespaces
+targetNamespaces: []
