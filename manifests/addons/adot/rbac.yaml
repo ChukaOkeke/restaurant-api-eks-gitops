@@ -1,11 +1,17 @@
 # ==============================================================================
-# ADOT COLLECTOR WORKLOAD RBAC CONFIGURATION
+# ADOT COLLECTOR WORKLOAD SERVICE ACCOUNT & RBAC CONFIGURATION
 # ==============================================================================
 # Grants permissions to the 'adot-collector-sa' ServiceAccount required for:
 # 1. Prometheus Service Discovery (Kubernetes Pods, Endpoints, Nodes, Services)
 # 2. k8sattributes Processor (Associating Pod/ReplicaSet metadata with telemetry)
 # 3. Kubelet / CAdvisor metrics scraping via proxy endpoints
 # ==============================================================================
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: adot-collector-sa
+  namespace: opentelemetry
+---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
