@@ -37,9 +37,3 @@ manager:
 admissionWebhooks:
   certManager:
     enabled: true
-
-# ------------------------------------------------------------------------------
-# 3. Scope & Feature Gates
-# ------------------------------------------------------------------------------
-# Allow the operator to watch and inject auto-instrumentation across all namespaces
-targetNamespaces: []
