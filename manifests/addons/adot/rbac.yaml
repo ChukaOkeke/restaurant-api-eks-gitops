@@ -1,0 +1,65 @@
+# ==============================================================================
+# ADOT COLLECTOR WORKLOAD RBAC CONFIGURATION
+# ==============================================================================
+# Grants permissions to the 'adot-collector-sa' ServiceAccount required for:
+# 1. Prometheus Service Discovery (Kubernetes Pods, Endpoints, Nodes, Services)
+# 2. k8sattributes Processor (Associating Pod/ReplicaSet metadata with telemetry)
+# 3. Kubelet / CAdvisor metrics scraping via proxy endpoints
+# ==============================================================================
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: adot-collector-role
+  labels:
+    app.kubernetes.io/name: adot-collector
+    app.kubernetes.io/component: rbac
+rules:
+  # Core API resources required for metric scraping & k8s metadata enrichment
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/metrics
+      - nodes/proxy
+      - services
+      - endpoints
+      - pods
+      - namespaces
+      - configmaps
+    verbs: ["get", "list", "watch"]
+
+  # Apps API resources required for deployment/daemonset metadata matching
+  - apiGroups: ["apps"]
+    resources:
+      - daemonsets
+      - deployments
+      - statefulsets
+      - replicasets
+    verbs: ["get", "list", "watch"]
+
+  # Non-resource URLs required for scraping raw node & cAdvisor metrics
+  - nonResourceURLs: 
+      - "/metrics"
+      - "/metrics/cadvisor"
+    verbs: ["get"]
+
+---
+# ==============================================================================
+# CLUSTER ROLE BINDING
+# Binds 'adot-collector-role' to 'adot-collector-sa' in namespace 'opentelemetry'
+# ==============================================================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: adot-collector-binding
+  labels:
+    app.kubernetes.io/name: adot-collector
+    app.kubernetes.io/component: rbac
+subjects:
+  - kind: ServiceAccount
+    name: adot-collector-sa
+    namespace: opentelemetry
+roleRef:
+  kind: ClusterRole
+  name: adot-collector-role
+  apiGroup: rbac.authorization.k8s.io

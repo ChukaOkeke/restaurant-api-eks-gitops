@@ -1,19 +1,24 @@
-# This ArgoCD Application deploys the ADOT Collector via Helm to the EKS cluster.
+# This ArgoCD Application deploys the ADOT Collector resources via Helm to the EKS cluster.
 # The ADOT Collector is responsible for collecting telemetry data (metrics, traces, and logs) from the application and sending it to observability backends.
 
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: adot-collector
+  name: adot-collector-resources
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    # Wave 3: Ensures ADOT Operator (Wave 2) is healthy and webhooks are active before creating CRs
+    argocd.argoproj.io/sync-wave: "3"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
+  source:
+    repoURL: 'https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git'
+    targetRevision: HEAD
+    path: manifests/addons/adot
   destination:
-    server: https://kubernetes.default.svc
+    server: 'https://kubernetes.default.svc'
     namespace: opentelemetry
   syncPolicy:
     automated:
@@ -21,26 +26,12 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      # Bypasses dry-run validation failures if the Argo CD server cache hasn't refreshed 
-      # the CRD schemas or cert-manager admission webhooks installed during Wave 1.
+      # Bypasses dry-run validation failures if Argo CD cache hasn't refreshed opentelemetry.io CRDs
       - SkipDryRunOnMissingResource=true
-    # Retries sync automatically if AWS IAM Pod Identity associations or cert-manager 
-    # webhook endpoints are still initializing when Wave 2 triggers.
+    # Retries sync automatically if ADOT operator admission webhooks are still starting up
     retry:
       limit: 5
       backoff:
         duration: 10s
         factor: 2
         maxDuration: 3m
-  sources:
-    # Source 1: Official OpenTelemetry Helm Chart
-    - repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
-      chart: opentelemetry-collector
-      targetRevision: 0.90.1
-      helm:
-        valueFiles:
-          - $values/values/addons/adot-collector-values.yaml
-    # Source 2: GitOps Configuration Repo for the values file
-    - repoURL: https://github.com/ChukaOkeke/restaurant-api-eks-gitops.git
-      targetRevision: HEAD
-      ref: values

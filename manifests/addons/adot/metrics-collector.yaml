@@ -1,0 +1,121 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: adot-metrics-prometheus
+  namespace: opentelemetry
+spec:
+  # Deployment mode for cluster-wide Prometheus target scraping
+  mode: deployment
+  replicas: 1
+  serviceAccount: adot-collector-sa
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+
+  env:
+    - name: CLUSTER_NAME
+      value: "restaurant-api-eks"
+    - name: AWS_REGION
+      value: "eu-west-1"
+
+  config:
+    receivers:
+      # OTLP receiver to accept application custom metrics
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+      # Scrape Kubernetes targets using standard Prometheus discovery rules
+      prometheus:
+        config:
+          global:
+            scrape_interval: 30s
+            scrape_timeout: 10s
+            external_labels:
+              cluster: ${CLUSTER_NAME}
+
+          scrape_configs:
+            # Scrape kube-state-metrics service
+            - job_name: "kube-state-metrics"
+              static_configs:
+                - targets: ["kube-state-metrics.monitoring.svc.cluster.local:8080"]
+
+            # Scrape annotated application pods across all namespaces
+            - job_name: "kubernetes-pods"
+              kubernetes_sd_configs:
+                - role: pod
+              relabel_configs:
+                - action: keep
+                  regex: true
+                  source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                - action: replace
+                  regex: (https?)
+                  source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+                  target_label: __scheme__
+                - action: replace
+                  regex: (.+)
+                  source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                  target_label: __metrics_path__
+                - action: replace
+                  regex: ([^:]+)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+                  source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                  target_label: __address__
+                - action: labelmap
+                  regex: __meta_kubernetes_pod_label_(.+)
+                - action: replace
+                  source_labels: [__meta_kubernetes_namespace]
+                  target_label: kubernetes_namespace
+                - action: replace
+                  source_labels: [__meta_kubernetes_pod_name]
+                  target_label: kubernetes_pod_name
+                - action: drop
+                  regex: Pending|Succeeded|Failed|Completed
+                  source_labels: [__meta_kubernetes_pod_phase]
+
+    processors:
+      memory_limiter:
+        check_interval: 5s
+        limit_mib: 768
+        spike_limit_mib: 128
+
+      # Inject EKS & EC2 AWS metadata tags onto metric series
+      resourcedetection/eks:
+        detectors: [env, eks, ec2]
+        timeout: 10s
+        override: false
+
+      batch:
+        timeout: 10s
+        send_batch_size: 1000
+
+    exporters:
+      # Remote write directly into Amazon Managed Prometheus using AWS SigV4
+      prometheusremotewrite:
+        endpoint: "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-514f4699-446a-4c71-b38b-f4aa36a9a8f8/api/v1/remote_write"
+        auth:
+          authenticator: sigv4auth
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+      # SigV4 Extension authenticates AMP requests using Pod Identity IAM credentials
+      sigv4auth:
+        region: "eu-west-1"
+        service: "aps"
+
+    service:
+      extensions: [health_check, sigv4auth]
+      pipelines:
+        metrics:
+          receivers: [otlp, prometheus]
+          processors: [memory_limiter, resourcedetection/eks, batch]
+          exporters: [prometheusremotewrite]
