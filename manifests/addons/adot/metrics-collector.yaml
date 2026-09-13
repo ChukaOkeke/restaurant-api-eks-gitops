@@ -8,7 +8,6 @@ spec:
   mode: deployment
   replicas: 1
   serviceAccount: adot-collector-sa
-
   resources:
     limits:
       cpu: 1000m
@@ -16,13 +15,11 @@ spec:
     requests:
       cpu: 200m
       memory: 512Mi
-
   env:
     - name: CLUSTER_NAME
       value: "restaurant-api-eks"
     - name: AWS_REGION
       value: "eu-west-1"
-
   config:
     receivers:
       # OTLP receiver to accept application custom metrics
@@ -32,7 +29,6 @@ spec:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
-
       # Scrape Kubernetes targets using standard Prometheus discovery rules
       prometheus:
         config:
@@ -41,13 +37,11 @@ spec:
             scrape_timeout: 10s
             external_labels:
               cluster: ${CLUSTER_NAME}
-
           scrape_configs:
             # Scrape kube-state-metrics service
             - job_name: "kube-state-metrics"
               static_configs:
                 - targets: ["kube-state-metrics.monitoring.svc.cluster.local:8080"]
-
             # Scrape annotated application pods across all namespaces
             - job_name: "kubernetes-pods"
               kubernetes_sd_configs:
@@ -80,30 +74,25 @@ spec:
                 - action: drop
                   regex: Pending|Succeeded|Failed|Completed
                   source_labels: [__meta_kubernetes_pod_phase]
-
     processors:
       memory_limiter:
         check_interval: 5s
         limit_mib: 768
         spike_limit_mib: 128
-
       # Inject EKS & EC2 AWS metadata tags onto metric series
       resourcedetection/eks:
         detectors: [env, eks, ec2]
         timeout: 10s
         override: false
-
       batch:
         timeout: 10s
         send_batch_size: 1000
-
     exporters:
       # Remote write directly into Amazon Managed Prometheus using AWS SigV4
       prometheusremotewrite:
-        endpoint: "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-514f4699-446a-4c71-b38b-f4aa36a9a8f8/api/v1/remote_write"
+        endpoint: "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-6bf8ff31-7859-4451-a303-a7aa97d419cb/api/v1/remote_write"
         auth:
           authenticator: sigv4auth
-
     extensions:
       health_check:
         endpoint: 0.0.0.0:13133
@@ -111,7 +100,6 @@ spec:
       sigv4auth:
         region: "eu-west-1"
         service: "aps"
-
     service:
       extensions: [health_check, sigv4auth]
       pipelines:
