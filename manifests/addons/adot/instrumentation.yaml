@@ -6,7 +6,7 @@ metadata:
 spec:
   # Target local cluster OTLP HTTP receiver served by the traces collector
   exporter:
-    endpoint: http://adot-traces-collector.opentelemetry.svc.cluster.local:4318
+    endpoint: http://adot-traces-collector.opentelemetry.svc.cluster.local:4318/v1/traces
 
   # Cross-service distributed tracing propagators
   propagators:
