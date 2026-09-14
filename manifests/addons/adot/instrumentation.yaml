@@ -6,7 +6,7 @@ metadata:
 spec:
   # Target local cluster OTLP HTTP receiver served by the traces collector.
   exporter:
-    endpoint: http://adot-traces-collector.opentelemetry.svc.cluster.local:4318
+    endpoint: http://adot-traces-collector.opentelemetry.svc.cluster.local:4317
 
   # Cross-service distributed tracing propagators
   propagators:
@@ -23,7 +23,7 @@ spec:
     - name: OTEL_SDK_DISABLED
       value: "false"
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
-      value: "http/protobuf"
+      value: "grpc"
     - name: OTEL_RESOURCE_PROVIDERS_AWS_ENABLED
       value: "true"
     - name: OTEL_TRACES_EXPORTER
