@@ -4,7 +4,7 @@ metadata:
   name: restaurant-api-instrumentation
   namespace: restaurant-api
 spec:
-  # Target local cluster OTLP HTTP receiver served by the traces collector
+  # Target local cluster OTLP HTTP receiver served by the traces collector.
   exporter:
     endpoint: http://adot-traces-collector.opentelemetry.svc.cluster.local:4318/v1/traces
 
