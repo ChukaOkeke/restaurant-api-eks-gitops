@@ -18,6 +18,8 @@ spec:
     type: always_on
 
   env:
+    - name: OTEL_PYTHON_DISABLED_INSTRUMENTATIONS
+      value: "aws-lambda"
     - name: OTEL_SDK_DISABLED
       value: "false"
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
