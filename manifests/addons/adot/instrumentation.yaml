@@ -27,7 +27,7 @@ spec:
     - name: OTEL_RESOURCE_PROVIDERS_AWS_ENABLED
       value: "true"
     - name: OTEL_TRACES_EXPORTER
-      value: "otlp"
+      value: "otlp_proto_grpc"
     - name: OTEL_METRICS_EXPORTER
       value: "none"
     - name: OTEL_LOGS_EXPORTER
