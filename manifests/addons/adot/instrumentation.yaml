@@ -4,9 +4,11 @@ metadata:
   name: restaurant-api-instrumentation
   namespace: restaurant-api
 spec:
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
   # Target local cluster OTLP HTTP receiver served by the traces collector.
   exporter:
-    endpoint: http://adot-traces-collector.opentelemetry.svc.cluster.local:4317
+    endpoint: http://adot-traces-collector.opentelemetry.svc.cluster.local:4318
 
   # Cross-service distributed tracing propagators
   propagators:
@@ -23,11 +25,11 @@ spec:
     - name: OTEL_SDK_DISABLED
       value: "false"
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
-      value: "grpc"
+      value: "http/protobuf"
     - name: OTEL_RESOURCE_PROVIDERS_AWS_ENABLED
       value: "true"
     - name: OTEL_TRACES_EXPORTER
-      value: "otlp_proto_grpc"
+      value: "otlp"
     - name: OTEL_METRICS_EXPORTER
       value: "none"
     - name: OTEL_LOGS_EXPORTER
