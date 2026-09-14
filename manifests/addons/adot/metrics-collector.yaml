@@ -90,7 +90,7 @@ spec:
     exporters:
       # Remote write directly into Amazon Managed Prometheus using AWS SigV4
       prometheusremotewrite:
-        endpoint: "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-6bf8ff31-7859-4451-a303-a7aa97d419cb/api/v1/remote_write"
+        endpoint: "https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-a5369e27-add1-4e9f-8b3e-efbdd46e80cf/api/v1/remote_write"
         auth:
           authenticator: sigv4auth
     extensions:
