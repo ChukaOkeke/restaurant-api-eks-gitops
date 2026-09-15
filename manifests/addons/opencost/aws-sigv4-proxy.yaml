@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-sigv4-proxy
+  namespace: opencost
+  labels:
+    app.kubernetes.io/name: aws-sigv4-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aws-sigv4-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aws-sigv4-proxy
+    spec:
+      serviceAccountName: opencost-sa
+      containers:
+        - name: aws-sigv4-proxy
+          image: public.ecr.aws/aws-observability/aws-sigv4-proxy:v1.0
+          args:
+            - --name=aps
+            - --region=eu-west-1
+            - --host=aps-workspaces.eu-west-1.amazonaws.com
+            - --port=:8005
+          ports:
+            - containerPort: 8005
+              name: proxy
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aws-sigv4-proxy
+  namespace: opencost
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8005
+      targetPort: 8005
+      protocol: TCP
+      name: proxy
+  selector:
+    app.kubernetes.io/name: aws-sigv4-proxy
