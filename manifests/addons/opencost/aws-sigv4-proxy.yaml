@@ -18,7 +18,7 @@ spec:
       serviceAccountName: opencost-sa
       containers:
         - name: aws-sigv4-proxy
-          image: public.ecr.aws/aws-observability/aws-sigv4-proxy:v1.0
+          image: public.ecr.aws/aws-observability/aws-sigv4-proxy:1.10
           args:
             - --name=aps
             - --region=eu-west-1
