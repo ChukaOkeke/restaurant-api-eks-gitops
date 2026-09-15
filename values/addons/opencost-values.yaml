@@ -1,17 +1,15 @@
 opencost:
   exporter:
     defaultClusterId: "restaurant-api-eks"
-    prometheus:
-      external:
-        enabled: true
-        # Dynamically injected by GitHub Actions CI/CD via Terraform output
-        url: "http://127.0.0.1:8005/workspaces/ws-b758451c-a897-4bd6-b5b0-77756c35d4e8"
+  prometheus:
+    internal:
+      enabled: false
+    external:
+      enabled: true
+      # Dynamically injected by GitHub Actions CI/CD via Terraform output
+      url: "http://127.0.0.1:8005/workspaces/ws-b758451c-a897-4bd6-b5b0-77756c35d4e8"
   ui:
     enabled: true
-  # Enable ServiceAccount explicitly so EKS Pod Identity can map the AMP IAM Role
-  serviceAccount:
-    create: true
-    name: "opencost-sa"
   # Inject the SigV4 Proxy Sidecar to handle AWS IAM signing to AMP
   extraContainers:
     - name: aws-sigv4-proxy
@@ -31,6 +29,11 @@ opencost:
         requests:
           cpu: 50m
           memory: 64Mi
+
+serviceAccount:
+  create: true
+  name: "opencost-sa"
+
 service:
   type: ClusterIP
   port: 9003
