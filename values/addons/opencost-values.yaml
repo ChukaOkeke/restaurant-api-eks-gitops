@@ -1,32 +1,13 @@
 opencost:
   exporter:
     defaultClusterId: "restaurant-api-eks"
-    # Inject the SigV4 Proxy Sidecar to handle AWS IAM signing to AMP
-    extraContainers:
-      - name: aws-sigv4-proxy
-        image: public.ecr.aws/aws-observability/aws-sigv4-proxy:v1.0
-        args:
-          - --name=aps
-          - --region=eu-west-1
-          - --host=aps-workspaces.eu-west-1.amazonaws.com
-          - --port=:8005
-        ports:
-          - containerPort: 8005
-            name: aws-sigv4-proxy
-        resources:
-          limits:
-            cpu: 100m
-            memory: 128Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
   prometheus:
     internal:
       enabled: false
     external:
       enabled: true
       # Dynamically injected by GitHub Actions CI/CD via Terraform output
-      url: "http://127.0.0.1:8005/workspaces/ws-b758451c-a897-4bd6-b5b0-77756c35d4e8"
+      url: "http://aws-sigv4-proxy.opencost.svc.cluster.local:8005/workspaces/ws-b758451c-a897-4bd6-b5b0-77756c35d4e8"
   ui:
     enabled: true
 
