@@ -20,13 +20,13 @@ spec:
         - name: aws-sigv4-proxy
           image: public.ecr.aws/aws-observability/aws-sigv4-proxy:1.10
           args:
-            - -name
+            - --name
             - aps
-            - -region
+            - --region
             - eu-west-1
-            - -host
+            - --host
             - aps-workspaces.eu-west-1.amazonaws.com
-            - -port
+            - --port
             - :8005
           ports:
             - containerPort: 8005
