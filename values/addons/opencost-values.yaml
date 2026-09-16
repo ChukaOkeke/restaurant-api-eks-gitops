@@ -10,11 +10,9 @@ opencost:
       url: "http://aws-sigv4-proxy.opencost.svc.cluster.local:8005/workspaces/ws-b758451c-a897-4bd6-b5b0-77756c35d4e8"
   ui:
     enabled: true
-
 serviceAccount:
   create: true
   name: "opencost-sa"
-
 service:
   type: ClusterIP
   port: 9003
