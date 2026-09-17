@@ -7,7 +7,7 @@ opencost:
     external:
       enabled: true
       # Dynamically injected by GitHub Actions CI/CD via Terraform output
-      url: "http://aws-sigv4-proxy.opencost.svc.cluster.local:8005/workspaces/ws-b758451c-a897-4bd6-b5b0-77756c35d4e8"
+      url: "http://aws-sigv4-proxy.opencost.svc.cluster.local:8005/workspaces/ws-98541f83-9a89-4bd6-a2f7-52ea501b9117"
   ui:
     enabled: true
 serviceAccount:
