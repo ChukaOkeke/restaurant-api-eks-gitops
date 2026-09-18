@@ -1,1 +1,1 @@
-# restaurant-api-eks-gitops
+This is the GitOps repository, one part of the dual-repo EKS project structure that also includes the [App repo](https://github.com/ChukaOkeke/restaurant-api-eks). It contains the ArgoCD App manifests, platform controllers, and Helm values.
