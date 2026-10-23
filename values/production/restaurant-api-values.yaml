@@ -16,6 +16,7 @@ secrets:
   storeName: "aws-secretsmanager"
   appSecretName: "restaurant-api-dev-app-secrets"
   rdsSecretName: "arn:aws:secretsmanager:eu-west-1:618339653656:secret:rds!db-1ae934fd-6120-441c-b322-f3aec4d828db-2kQbBB" # Replace with Terraform output
+  redisSecretName: "restaurant-api-dev-redis-secret"
 config:
   DB_HOST: "restaurant-api-dev-db.cvcmaqucsk7w.eu-west-1.rds.amazonaws.com" # Replace with Terraform output
   DB_NAME: "asgard_cuisines_db"
